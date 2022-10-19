@@ -16,6 +16,7 @@ export default function PdfReader({route, navigation}) {
     // );
 
     try {
+      const apiURL = "https://62b5-103-166-18-111.in.ngrok.io/uploadpdf"
       const formdata = new FormData();
       formdata.append('file', {
         uri:pdf.uri,
@@ -24,7 +25,7 @@ export default function PdfReader({route, navigation}) {
       });
       console.log(formdata);
       
-      let response = await fetch(`https://3380-103-166-18-63.in.ngrok.io/file`, {
+      let response = await fetch(apiURL, {
             method: 'post',
             body: formdata,
             headers: {
@@ -33,7 +34,7 @@ export default function PdfReader({route, navigation}) {
           });
   
       let result = await response.json();
-      console.log(result); 
+      console.log(result);
     } 
     catch (error) {
       console.error(error)
