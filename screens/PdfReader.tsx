@@ -5,11 +5,13 @@ import window from "../constants/Layout"
 import axios from "axios"
 import { useEffect, useRef, useState } from "react"
 import { Audio } from "expo-av"
+import Slider from "@react-native-community/slider"
 
 export default function PdfReader({ route, ...rest }) {
   const url = "https://4483-103-163-182-17.in.ngrok.io/"
   const [isExtended, setIsExtended] = useState(true)
   const [isRequesting, setIsRequesting] = useState(false)
+  const [sliderVisible, setSliderVisible] = useState(false)
   const audio = useRef(null)
   const [audioIcon, setAudioIcon] = useState(
     audio.current ? "play" : "book-music-outline"
@@ -48,6 +50,8 @@ export default function PdfReader({ route, ...rest }) {
   async function playAudio(
     audiouri = "http://labs.phaser.io/assets/audio/DOG.mp3"
   ) {
+    console.log(audio)
+
     if (audio.current !== null) {
       if (audioIcon === "pause") {
         setAudioIcon("play")
@@ -62,6 +66,14 @@ export default function PdfReader({ route, ...rest }) {
           uri: audiouri,
         })
         audio.current = sound
+        audio.current.setOnPlaybackStatusUpdate(
+          (status: { didJustFinish: any }) => {
+            if (status.didJustFinish) {
+              setAudioIcon("play")
+            }
+          }
+        )
+
         await sound.playAsync()
         setAudioIcon("pause")
         setIsRequesting(false)
@@ -69,6 +81,17 @@ export default function PdfReader({ route, ...rest }) {
         console.log(error)
       }
     }
+  }
+
+  function getCurrentSliderPosition() {
+    audio.current?.setOnPlaybackStatusUpdate(
+      (status: { positionMillis: number; durationMillis: number }) => {
+        const current = status.positionMillis / status.durationMillis
+        console.log({ current })
+        return current
+      }
+    )
+    return 0
   }
 
   //set timeout function to hide the FAB
@@ -105,6 +128,32 @@ export default function PdfReader({ route, ...rest }) {
           },
         }}
       />
+      {sliderVisible && (
+        <Slider
+          style={Styles.slider}
+          minimumValue={audio.current ? 0 : 0}
+          maximumValue={audio.current ? 1 : 0}
+          value={getCurrentSliderPosition()}
+          onValueChange={(value) => {
+            audio.current?.setOnPlaybackStatusUpdate(
+              async (status: { durationMillis: number }) => {
+                const current = value * status.durationMillis
+                await audio.current.setPositionAsync(current)
+              }
+            )
+          }}
+          onSlidingStart={async () => {
+            await audio.current.pauseAsync()
+            setAudioIcon("play")
+          }}
+          onSlidingComplete={async () => {
+            await audio.current.playAsync()
+            setAudioIcon("pause")
+          }}
+          minimumTrackTintColor="orange"
+          maximumTrackTintColor="#000000"
+        />
+      )}
       {isRequesting ? (
         <FAB icon={audioIcon} loading={true} style={Styles.fab} />
       ) : (
@@ -115,6 +164,15 @@ export default function PdfReader({ route, ...rest }) {
             extended={isExtended}
             onPress={() => {
               audio.current ? playAudio() : pdf2Text()
+            }}
+            onLongPress={() => {
+              audio.current?.setOnPlaybackStatusUpdate(
+                (status: { isLoaded: any }) => {
+                  if (status.isLoaded) {
+                    setSliderVisible(true)
+                  }
+                }
+              )
             }}
             visible={visible}
             animateFrom={"right"}
@@ -139,14 +197,19 @@ const Styles = StyleSheet.create({
     height: window["height"],
   },
   fab: {
-    position: "absolute",
-    right: 30,
     bottom: 30,
+    right: 30,
   },
   text: {
     textAlign: "center",
     marginVertical: 20,
     fontSize: 20,
     color: "pink",
+  },
+  slider: {
+    position: "absolute",
+    bottom: 5,
+    width: window.window.width,
+    height: 20,
   },
 })

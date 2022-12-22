@@ -1,5 +1,5 @@
 import React from "react"
-import { StyleSheet, StyleProp, ViewStyle } from "react-native"
+import { StyleSheet, StyleProp, ViewStyle, ScrollView } from "react-native"
 import { MonoText } from "../components/StyledText"
 import { Text, View } from "../components/Themed"
 import {
@@ -9,7 +9,9 @@ import {
   Modal,
   Portal,
   TextInput,
+  Divider,
 } from "react-native-paper"
+import AudioCard from "../components/Audio"
 
 export default function Audiobook() {
   const [ModalVisible, setModalVisible] = React.useState(false)
@@ -25,40 +27,44 @@ export default function Audiobook() {
   }
   return (
     <Provider>
-      <View style={Styles.container}>
-        <MonoText>Audiobook Views</MonoText>
-        <Text>Get all your generated audiobooks</Text>
-
-        <Portal>
-          <Modal
-            visible={ModalVisible}
-            onDismiss={hideModal}
-            contentContainerStyle={containerStyle}
-          >
-            <MonoText style={{ textAlign: "center" }}>
-              Add link to Modal
-            </MonoText>
-            <TextInput
-              mode="outlined"
-              label="PDF Link"
-              right={<TextInput.Affix text="🔗" />}
-              // multiline={true}
-              // numberOfLines={2}
-              style={{ width: "100%", alignSelf: "center" }}
-            />
-            <Button
-              mode="contained"
-              color="#ffb6c1"
-              onPress={() => console.log("Pressed")}
-              labelStyle={{ color: "#000000" }}
-              style={{ width: "50%", alignSelf: "center", marginTop: 5 }}
+      <ScrollView>
+        <View style={Styles.container}>
+          <MonoText>Audiobook Views</MonoText>
+          <Text>Get all your generated audiobooks</Text>
+          <Divider style={Styles.divider} />
+          <AudioCard />
+          <AudioCard />
+          <AudioCard />
+          <AudioCard />
+          <Portal>
+            <Modal
+              visible={ModalVisible}
+              onDismiss={hideModal}
+              contentContainerStyle={containerStyle}
             >
-              <MonoText>Fetch Pdf</MonoText>
-            </Button>
-          </Modal>
-        </Portal>
-        <FAB style={Styles.fab} icon="paperclip" onPress={showModal} />
-      </View>
+              <MonoText style={{ textAlign: "center" }}>
+                Add link to Modal
+              </MonoText>
+              <TextInput
+                mode="outlined"
+                label="PDF Link"
+                right={<TextInput.Affix text="🔗" />}
+                style={{ width: "100%", alignSelf: "center" }}
+              />
+              <Button
+                mode="contained"
+                color="#ffb6c1"
+                onPress={() => console.log("Pressed")}
+                labelStyle={{ color: "#000000" }}
+                style={{ width: "50%", alignSelf: "center", marginTop: 5 }}
+              >
+                <MonoText>Fetch Pdf</MonoText>
+              </Button>
+            </Modal>
+          </Portal>
+        </View>
+      </ScrollView>
+      <FAB style={Styles.fab} icon="paperclip" onPress={showModal} />
     </Provider>
   )
 }
@@ -68,7 +74,6 @@ const Styles = StyleSheet.create({
     flex: 1,
     backgroundColor: "#fff",
     alignItems: "center",
-    justifyContent: "center",
   },
   fab: {
     position: "absolute",
@@ -76,5 +81,9 @@ const Styles = StyleSheet.create({
     bottom: 30,
     backgroundColor: "#ffb6c1",
     transform: [{ rotate: "45deg" }],
+  },
+  divider: {
+    width: "100%",
+    height: 1,
   },
 })

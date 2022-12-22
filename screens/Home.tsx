@@ -1,4 +1,4 @@
-import { StyleSheet, TouchableOpacity } from "react-native"
+import { StyleSheet, TouchableOpacity, ScrollView } from "react-native"
 import { FontAwesome } from "@expo/vector-icons"
 import { View } from "../components/Themed"
 import window from "../constants/Layout"
@@ -43,60 +43,62 @@ const Home = ({ navigation }) => {
   }
 
   return (
-    <View style={Styles.container}>
-      <TouchableOpacity>
-        <Card
-          style={Styles.addCardContainer}
-          mode="outlined"
-          onPress={addDocument}
-          // onLongPress={}
-        >
-          <Card.Content style={{ paddingTop: 80 }}>
-            <FontAwesome
-              name="file-pdf-o"
-              size={25}
-              style={{ marginLeft: 30 }}
-            />
-            <Title>
-              <MonoText style={{ fontSize: 18 }}>Import Pdf</MonoText>
-            </Title>
-          </Card.Content>
-        </Card>
-      </TouchableOpacity>
+    <ScrollView>
+      <View style={Styles.container}>
+        <TouchableOpacity>
+          <Card
+            style={Styles.addCardContainer}
+            mode="outlined"
+            onPress={addDocument}
+            // onLongPress={}
+          >
+            <Card.Content style={{ paddingTop: 80 }}>
+              <FontAwesome
+                name="file-pdf-o"
+                size={25}
+                style={{ marginLeft: 30 }}
+              />
+              <Title>
+                <MonoText style={{ fontSize: 18 }}>Import Pdf</MonoText>
+              </Title>
+            </Card.Content>
+          </Card>
+        </TouchableOpacity>
 
-      {_pdfs.map((pdf, index) => {
-        return (
-          <TouchableOpacity key={index}>
-            <Card
-              style={Styles.cardContainer}
-              onPress={() => {
-                // setPdfSource(pdf);
-                // setOpenPdf(true);
-                navigation.navigate("Pdf", { pdf: pdf })
-              }}
-              mode="outlined"
-              // onLongPress={}  //TODO: Delete Pdf
-            >
-              {/* <Card.Cover style={Styles.coverImg} source={require(pdf.cover)} /> */}
-              <Card.Content>
-                <Title>
-                  <MonoText style={{ fontSize: 16 }}>{pdf.name}</MonoText>
-                </Title>
-                <Paragraph>
-                  <MonoText style={{ fontSize: 14 }}>
-                    Size: {pdf.size / 1024}kB
-                  </MonoText>
-                </Paragraph>
-              </Card.Content>
-            </Card>
-          </TouchableOpacity>
-        )
-      })}
+        {_pdfs.map((pdf, index) => {
+          return (
+            <TouchableOpacity key={index}>
+              <Card
+                style={Styles.cardContainer}
+                onPress={() => {
+                  // setPdfSource(pdf);
+                  // setOpenPdf(true);
+                  navigation.navigate("Pdf", { pdf: pdf })
+                }}
+                mode="outlined"
+                // onLongPress={}  //TODO: Delete Pdf
+              >
+                {/* <Card.Cover style={Styles.coverImg} source={require(pdf.cover)} /> */}
+                <Card.Content>
+                  <Title>
+                    <MonoText style={{ fontSize: 16 }}>{pdf.name}</MonoText>
+                  </Title>
+                  <Paragraph>
+                    <MonoText style={{ fontSize: 14 }}>
+                      Size: {pdf.size / 1024}kB
+                    </MonoText>
+                  </Paragraph>
+                </Card.Content>
+              </Card>
+            </TouchableOpacity>
+          )
+        })}
 
-      <Snackbar visible={SnackVisible} onDismiss={onDismissSnackBar}>
-        {errMsg}
-      </Snackbar>
-    </View>
+        <Snackbar visible={SnackVisible} onDismiss={onDismissSnackBar}>
+          {errMsg}
+        </Snackbar>
+      </View>
+    </ScrollView>
   )
 }
 export default Home
