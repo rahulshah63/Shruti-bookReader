@@ -58,7 +58,7 @@ function RootNavigator() {
         <Stack.Screen
           name="Pdf"
           component={PdfReader}
-          options={({ route, navigation }) => ({
+          options={({ route }) => ({
             title: route.params.pdf.name ?? "PDF Reader",
           })}
         />
