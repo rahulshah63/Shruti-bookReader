@@ -16,6 +16,7 @@ import {
 } from "react-native-paper"
 
 export default function AudioCard() {
+  const [seekTime, setSeekTime] = useState(0)
   const [isRequesting, setIsRequesting] = useState(false)
   const audio = useRef(null)
   const [audioIcon, setAudioIcon] = useState("play")
@@ -39,10 +40,15 @@ export default function AudioCard() {
         })
         audio.current = sound
         audio.current.setOnPlaybackStatusUpdate(
-          (status: { didJustFinish: any }) => {
+          (status: {
+            didJustFinish: boolean
+            positionMillis: number
+            durationMillis: number
+          }) => {
             if (status.didJustFinish) {
               setAudioIcon("play")
             }
+            setSeekTime(status.positionMillis / status.durationMillis)
           }
         )
         await sound.playAsync()
@@ -53,18 +59,6 @@ export default function AudioCard() {
       }
     }
   }
-
-  function getCurrentSliderPosition() {
-    audio.current?.setOnPlaybackStatusUpdate(
-      (status: { positionMillis: number; durationMillis: number }) => {
-        const current = status.positionMillis / status.durationMillis
-        console.log({ current })
-        return current
-      }
-    )
-    return 0
-  }
-
   useEffect(() => {
     return audio.current
       ? () => {
@@ -93,32 +87,26 @@ export default function AudioCard() {
           style={Styles.slider}
           minimumValue={audio.current ? 0 : 0}
           maximumValue={audio.current ? 1 : 0}
-          value={getCurrentSliderPosition()}
-          onValueChange={(value) => {
-            audio.current?.setOnPlaybackStatusUpdate(
-              async (status: { durationMillis: number }) => {
-                const current = value * status.durationMillis
-                await audio.current.setPositionAsync(current)
-              }
-            )
+          value={seekTime}
+          onValueChange={async (value) => {
+            if (!audio.current) return
+            const status = await audio.current?.getStatusAsync()
+            await audio.current?.setPositionAsync(value * status.durationMillis)
           }}
           onSlidingStart={async () => {
+            if (!audio.current) return
             await audio.current.pauseAsync()
             setAudioIcon("play")
           }}
           onSlidingComplete={async () => {
+            if (!audio.current) return
             await audio.current.playAsync()
             setAudioIcon("pause")
           }}
           minimumTrackTintColor="orange"
           maximumTrackTintColor="#000000"
         />
-        <TouchableOpacity
-          onPress={() => {
-            playAudio()
-          }}
-          style={Styles.playButton}
-        >
+        <TouchableOpacity onPress={() => playAudio()} style={Styles.playButton}>
           {isRequesting ? (
             <ActivityIndicator size="small" color="white" />
           ) : (

@@ -1,6 +1,6 @@
 import { StyleSheet, SafeAreaView } from "react-native"
 import PDFReader from "rn-pdf-reader-js"
-import { AnimatedFAB, FAB } from "react-native-paper"
+import { ActivityIndicator, AnimatedFAB, Button, FAB } from "react-native-paper"
 import window from "../constants/Layout"
 import axios from "axios"
 import { useEffect, useRef, useState } from "react"
@@ -10,6 +10,7 @@ import Slider from "@react-native-community/slider"
 export default function PdfReader({ route, ...rest }) {
   const url = "https://4483-103-163-182-17.in.ngrok.io/"
   const [isExtended, setIsExtended] = useState(true)
+  const [seekTime, setSeekTime] = useState(0)
   const [isRequesting, setIsRequesting] = useState(false)
   const [sliderVisible, setSliderVisible] = useState(false)
   const audio = useRef(null)
@@ -41,7 +42,7 @@ export default function PdfReader({ route, ...rest }) {
       console.log(res)
       // after getting response from server in mp3 format
       // play the audio
-      playAudio(res.data.audioLink)
+      // playAudio(res.data.audioLink)
     } catch (error) {
       console.log(error)
     }
@@ -50,8 +51,6 @@ export default function PdfReader({ route, ...rest }) {
   async function playAudio(
     audiouri = "http://labs.phaser.io/assets/audio/DOG.mp3"
   ) {
-    console.log(audio)
-
     if (audio.current !== null) {
       if (audioIcon === "pause") {
         setAudioIcon("play")
@@ -67,13 +66,17 @@ export default function PdfReader({ route, ...rest }) {
         })
         audio.current = sound
         audio.current.setOnPlaybackStatusUpdate(
-          (status: { didJustFinish: any }) => {
+          (status: {
+            didJustFinish: boolean
+            positionMillis: number
+            durationMillis: number
+          }) => {
             if (status.didJustFinish) {
               setAudioIcon("play")
             }
+            setSeekTime(status.positionMillis / status.durationMillis)
           }
         )
-
         await sound.playAsync()
         setAudioIcon("pause")
         setIsRequesting(false)
@@ -82,17 +85,15 @@ export default function PdfReader({ route, ...rest }) {
       }
     }
   }
-
-  function getCurrentSliderPosition() {
-    audio.current?.setOnPlaybackStatusUpdate(
-      (status: { positionMillis: number; durationMillis: number }) => {
-        const current = status.positionMillis / status.durationMillis
-        console.log({ current })
-        return current
-      }
-    )
-    return 0
-  }
+  useEffect(() => {
+    return audio.current
+      ? () => {
+          audio.current.pauseAsync()
+          audio.current.unloadAsync()
+          audio.current = null
+        }
+      : undefined
+  }, [audio.current])
 
   //set timeout function to hide the FAB
   useEffect(() => {
@@ -100,15 +101,6 @@ export default function PdfReader({ route, ...rest }) {
       setIsExtended(false)
     }, 3000)
   }, [])
-
-  useEffect(() => {
-    return audio.current
-      ? () => {
-          audio.current.unloadAsync()
-          audio.current = null
-        }
-      : undefined
-  }, [audio.current])
 
   return (
     <SafeAreaView style={Styles.container}>
@@ -133,20 +125,19 @@ export default function PdfReader({ route, ...rest }) {
           style={Styles.slider}
           minimumValue={audio.current ? 0 : 0}
           maximumValue={audio.current ? 1 : 0}
-          value={getCurrentSliderPosition()}
-          onValueChange={(value) => {
-            audio.current?.setOnPlaybackStatusUpdate(
-              async (status: { durationMillis: number }) => {
-                const current = value * status.durationMillis
-                await audio.current.setPositionAsync(current)
-              }
-            )
+          value={seekTime}
+          onValueChange={async (value) => {
+            if (!audio.current) return
+            const status = await audio.current?.getStatusAsync()
+            await audio.current?.setPositionAsync(value * status.durationMillis)
           }}
           onSlidingStart={async () => {
+            if (!audio.current) return
             await audio.current.pauseAsync()
             setAudioIcon("play")
           }}
           onSlidingComplete={async () => {
+            if (!audio.current) return
             await audio.current.playAsync()
             setAudioIcon("pause")
           }}
@@ -157,29 +148,21 @@ export default function PdfReader({ route, ...rest }) {
       {isRequesting ? (
         <FAB icon={audioIcon} loading={true} style={Styles.fab} />
       ) : (
-        <>
-          <AnimatedFAB
-            icon={audioIcon}
-            label={audio.current ? "Play" : "AudioBook"}
-            extended={isExtended}
-            onPress={() => {
-              audio.current ? playAudio() : pdf2Text()
-            }}
-            onLongPress={() => {
-              audio.current?.setOnPlaybackStatusUpdate(
-                (status: { isLoaded: any }) => {
-                  if (status.isLoaded) {
-                    setSliderVisible(true)
-                  }
-                }
-              )
-            }}
-            visible={visible}
-            animateFrom={"right"}
-            iconMode={"static"}
-            style={[Styles.fab, fabStyle]}
-          />
-        </>
+        <AnimatedFAB
+          icon={audioIcon}
+          label={audio.current ? "Play" : "AudioBook"}
+          extended={isExtended}
+          onPress={() => {
+            audio.current ? playAudio() : pdf2Text()
+          }}
+          onLongPress={() => {
+            setSliderVisible(!sliderVisible)
+          }}
+          visible={visible}
+          animateFrom={"right"}
+          iconMode={"static"}
+          style={[fabStyle, Styles.fab]}
+        />
       )}
     </SafeAreaView>
   )
@@ -188,15 +171,13 @@ export default function PdfReader({ route, ...rest }) {
 const Styles = StyleSheet.create({
   container: {
     flexGrow: 1,
-    alignContent: "center",
-    justifyContent: "center",
-    textAlign: "center",
   },
   pdfReader: {
     width: window["width"],
     height: window["height"],
   },
   fab: {
+    position: "absolute",
     bottom: 30,
     right: 30,
   },
