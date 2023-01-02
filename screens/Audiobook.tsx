@@ -12,6 +12,7 @@ import {
   Divider,
 } from "react-native-paper"
 import AudioCard from "../components/Audio"
+import Colors from "../constants/Colors"
 
 export default function Audiobook() {
   const [ModalVisible, setModalVisible] = React.useState(false)
@@ -26,7 +27,8 @@ export default function Audiobook() {
     padding: 20,
   }
   return (
-    <Provider>
+    // <Provider>
+    <View>
       <ScrollView>
         <View style={Styles.container}>
           <MonoText>Audiobook Views</MonoText>
@@ -36,7 +38,7 @@ export default function Audiobook() {
           <AudioCard />
           <AudioCard />
           <AudioCard />
-          <Portal>
+          {/* <Portal>
             <Modal
               visible={ModalVisible}
               onDismiss={hideModal}
@@ -61,11 +63,12 @@ export default function Audiobook() {
                 <MonoText>Fetch Pdf</MonoText>
               </Button>
             </Modal>
-          </Portal>
+          </Portal> */}
         </View>
       </ScrollView>
-      <FAB style={Styles.fab} icon="paperclip" onPress={showModal} />
-    </Provider>
+      <FAB style={Styles.fab} icon="refresh" onPress={showModal} />
+    </View>
+    // </Provider>
   )
 }
 
@@ -79,7 +82,7 @@ const Styles = StyleSheet.create({
     position: "absolute",
     right: 30,
     bottom: 30,
-    backgroundColor: "#ffb6c1",
+    backgroundColor: "#296d98",
     transform: [{ rotate: "45deg" }],
   },
   divider: {

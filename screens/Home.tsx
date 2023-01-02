@@ -1,4 +1,9 @@
-import { StyleSheet, TouchableOpacity, ScrollView } from "react-native"
+import {
+  StyleSheet,
+  TouchableOpacity,
+  ScrollView,
+  Dimensions,
+} from "react-native"
 import { FontAwesome } from "@expo/vector-icons"
 import { View } from "../components/Themed"
 import window from "../constants/Layout"
@@ -6,6 +11,7 @@ import { MonoText } from "../components/StyledText"
 import React, { useState } from "react"
 import { Card, Title, Paragraph, Snackbar } from "react-native-paper"
 import * as DocumentPicker from "expo-document-picker"
+import { SafeAreaProvider } from "react-native-safe-area-context"
 
 const Home = ({ navigation }) => {
   const [_pdfs, setPdfs] = useState([])
@@ -20,7 +26,6 @@ const Home = ({ navigation }) => {
       type: "application/pdf",
       copyToCacheDirectory: true,
     })
-    console.log(result)
 
     if (result.type === "success") {
       const { name, size } = result
@@ -43,7 +48,7 @@ const Home = ({ navigation }) => {
   }
 
   return (
-    <ScrollView>
+    <ScrollView contentContainerStyle={{ minHeight: "100%" }}>
       <View style={Styles.container}>
         <TouchableOpacity>
           <Card
@@ -93,11 +98,21 @@ const Home = ({ navigation }) => {
             </TouchableOpacity>
           )
         })}
-
-        <Snackbar visible={SnackVisible} onDismiss={onDismissSnackBar}>
-          {errMsg}
-        </Snackbar>
       </View>
+      <Snackbar
+        visible={SnackVisible}
+        onDismiss={onDismissSnackBar}
+        duration={2000}
+        action={{
+          label: "Ok",
+          icon: "check",
+          onPress: () => {
+            onDismissSnackBar()
+          },
+        }}
+      >
+        {errMsg}
+      </Snackbar>
     </ScrollView>
   )
 }

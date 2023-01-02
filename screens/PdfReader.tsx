@@ -3,12 +3,15 @@ import PDFReader from "rn-pdf-reader-js"
 import { ActivityIndicator, AnimatedFAB, Button, FAB } from "react-native-paper"
 import window from "../constants/Layout"
 import axios from "axios"
+import { Snackbar } from "react-native-paper"
 import { useEffect, useRef, useState } from "react"
 import { Audio } from "expo-av"
 import Slider from "@react-native-community/slider"
+import Colors from "../constants/Colors"
 
-export default function PdfReader({ route, ...rest }) {
-  const url = "https://4483-103-163-182-17.in.ngrok.io/"
+export default function PdfReader({ route }) {
+  const [SnackVisible, setSnackVisible] = useState(false)
+  const [msg, setMsg] = useState("")
   const [isExtended, setIsExtended] = useState(true)
   const [seekTime, setSeekTime] = useState(0)
   const [isRequesting, setIsRequesting] = useState(false)
@@ -18,15 +21,16 @@ export default function PdfReader({ route, ...rest }) {
     audio.current ? "play" : "book-music-outline"
   )
   const pdf = route.params.pdf
-
   const animateFrom = "right"
   const visible = true
   const fabStyle = { [animateFrom]: 30 }
 
+  const onToggleSnackBar = () => setSnackVisible(!SnackVisible)
+  const onDismissSnackBar = () => setSnackVisible(false)
+
   async function pdf2Text() {
     try {
       setIsRequesting(true)
-      playAudio()
       const formData = new FormData()
       formData.append("file", {
         uri: pdf.uri,
@@ -34,23 +38,21 @@ export default function PdfReader({ route, ...rest }) {
         name: pdf.name,
       })
       formData.append("voice", "true")
-      const res = await axios.post(url, formData, {
+      const res = await axios.post(global.API, formData, {
         headers: {
           "Content-Type": "multipart/form-data",
         },
       })
       console.log(res)
-      // after getting response from server in mp3 format
-      // play the audio
-      // playAudio(res.data.audioLink)
+      if (res.status === 200) playAudio()
     } catch (error) {
-      console.log(error)
+      setMsg("Error: " + error.message)
+      onToggleSnackBar()
+      setIsRequesting(false)
     }
   }
 
-  async function playAudio(
-    audiouri = "http://labs.phaser.io/assets/audio/DOG.mp3"
-  ) {
+  async function playAudio() {
     if (audio.current !== null) {
       if (audioIcon === "pause") {
         setAudioIcon("play")
@@ -62,7 +64,7 @@ export default function PdfReader({ route, ...rest }) {
     } else {
       try {
         const { sound } = await Audio.Sound.createAsync({
-          uri: audiouri,
+          uri: `${global.API}/sendfile/?filename=${pdf.name.split(".")[0]}`,
         })
         audio.current = sound
         audio.current.setOnPlaybackStatusUpdate(
@@ -81,7 +83,9 @@ export default function PdfReader({ route, ...rest }) {
         setAudioIcon("pause")
         setIsRequesting(false)
       } catch (error) {
-        console.log(error)
+        setMsg("Error: " + error.message)
+        setIsRequesting(false)
+        onToggleSnackBar()
       }
     }
   }
@@ -164,6 +168,18 @@ export default function PdfReader({ route, ...rest }) {
           style={[fabStyle, Styles.fab]}
         />
       )}
+      <Snackbar
+        visible={SnackVisible}
+        onDismiss={onDismissSnackBar}
+        action={{
+          label: "Close",
+          onPress: () => {
+            onDismissSnackBar()
+          },
+        }}
+      >
+        {msg}
+      </Snackbar>
     </SafeAreaView>
   )
 }
