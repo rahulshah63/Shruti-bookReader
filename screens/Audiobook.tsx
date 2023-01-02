@@ -1,74 +1,65 @@
-import React from "react"
-import { StyleSheet, StyleProp, ViewStyle, ScrollView } from "react-native"
+import React, { useEffect, useRef, useState } from "react"
+import { StyleSheet, ScrollView } from "react-native"
 import { MonoText } from "../components/StyledText"
 import { Text, View } from "../components/Themed"
-import {
-  Provider,
-  Button,
-  FAB,
-  Modal,
-  Portal,
-  TextInput,
-  Divider,
-} from "react-native-paper"
+import { FAB, Divider, Snackbar } from "react-native-paper"
 import AudioCard from "../components/Audio"
-import Colors from "../constants/Colors"
+import axios from "axios"
 
 export default function Audiobook() {
-  const [ModalVisible, setModalVisible] = React.useState(false)
-  const showModal = () => setModalVisible(true)
-  const hideModal = () => setModalVisible(false)
-  const containerStyle: StyleProp<ViewStyle> = {
-    backgroundColor: "#e5e5e5",
-    height: "40%",
-    width: "70%",
-    borderRadius: 20,
-    alignSelf: "center",
-    padding: 20,
+  const [SnackVisible, setSnackVisible] = useState(false)
+  const [msg, setMsg] = useState("")
+  const audiobook = useRef(null)
+
+  const onToggleSnackBar = () => setSnackVisible(!SnackVisible)
+  const onDismissSnackBar = () => setSnackVisible(false)
+
+  async function fetchAudiobooks() {
+    try {
+      const response = await axios.get(`${global.API}/audiobooks`)
+      audiobook.current = response.data
+      setMsg("Audiobooks fetched Successfully.")
+      onToggleSnackBar()
+    } catch (error) {
+      setMsg(error)
+      onToggleSnackBar()
+    }
   }
+
+  useEffect(() => {
+    ;(async () => {
+      await fetchAudiobooks()
+    })()
+  }, [])
+
   return (
-    // <Provider>
     <View>
       <ScrollView>
         <View style={Styles.container}>
           <MonoText>Audiobook Views</MonoText>
           <Text>Get all your generated audiobooks</Text>
           <Divider style={Styles.divider} />
-          <AudioCard />
-          <AudioCard />
-          <AudioCard />
-          <AudioCard />
-          {/* <Portal>
-            <Modal
-              visible={ModalVisible}
-              onDismiss={hideModal}
-              contentContainerStyle={containerStyle}
-            >
-              <MonoText style={{ textAlign: "center" }}>
-                Add link to Modal
-              </MonoText>
-              <TextInput
-                mode="outlined"
-                label="PDF Link"
-                right={<TextInput.Affix text="🔗" />}
-                style={{ width: "100%", alignSelf: "center" }}
-              />
-              <Button
-                mode="contained"
-                color="#ffb6c1"
-                onPress={() => console.log("Pressed")}
-                labelStyle={{ color: "#000000" }}
-                style={{ width: "50%", alignSelf: "center", marginTop: 5 }}
-              >
-                <MonoText>Fetch Pdf</MonoText>
-              </Button>
-            </Modal>
-          </Portal> */}
+          {audiobook.current ? (
+            audiobook.current?.map((book) => <AudioCard book={book} />)
+          ) : (
+            <MonoText>No Audiobooks Found</MonoText>
+          )}
         </View>
       </ScrollView>
-      <FAB style={Styles.fab} icon="refresh" onPress={showModal} />
+      <FAB style={Styles.fab} icon="refresh" onPress={fetchAudiobooks} />
+      <Snackbar
+        visible={SnackVisible}
+        onDismiss={onDismissSnackBar}
+        action={{
+          label: "Close",
+          onPress: () => {
+            onDismissSnackBar()
+          },
+        }}
+      >
+        {msg}
+      </Snackbar>
     </View>
-    // </Provider>
   )
 }
 

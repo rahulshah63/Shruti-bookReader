@@ -9,7 +9,7 @@ import React, { useState, useRef, useEffect } from "react"
 import { MaterialCommunityIcons } from "@expo/vector-icons"
 import { Card, Title, Paragraph, ActivityIndicator } from "react-native-paper"
 
-export default function AudioCard() {
+export default function AudioCard({ book }) {
   const [duraMillis, setDuraMillis] = useState(0)
   const [seekTime, setSeekTime] = useState(0)
   const [isRequesting, setIsRequesting] = useState(false)
@@ -17,7 +17,7 @@ export default function AudioCard() {
   const [audioIcon, setAudioIcon] = useState("play")
 
   async function playAudio(
-    audiouri = "http://labs.phaser.io/assets/audio/DOG.mp3"
+    audiouri = `${global.API}/sendfile/?filename=${book.title}`
   ) {
     if (audio.current !== null) {
       if (audioIcon === "pause") {
@@ -67,17 +67,15 @@ export default function AudioCard() {
   return (
     <Card style={Styles.cardContatiner}>
       <Card.Content>
-        <Title>Shruti</Title>
-        <Paragraph>
-          Shruti, a nepali text to speech app based on Tacotron 2 model. This
-          app is developed by the team of <MonoText>Quadruples</MonoText>
-        </Paragraph>
+        <Title>{book.title}</Title>
+        <MonoText>{book.tag}</MonoText>
+        <Paragraph>{book.description}</Paragraph>
       </Card.Content>
 
       <View style={Styles.card}>
         <Card.Cover
           style={Styles.image}
-          source={{ uri: "https://picsum.photos/700" }}
+          source={{ uri: `${global.API}/sendCoverImg/?img=${book.title}` }}
         />
         <View style={Styles.audioContainer}>
           <MonoText
