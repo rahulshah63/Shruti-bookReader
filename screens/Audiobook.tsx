@@ -5,9 +5,11 @@ import { Text, View } from "../components/Themed"
 import { FAB, Divider, Snackbar } from "react-native-paper"
 import AudioCard from "../components/Audio"
 import axios from "axios"
+import { SafeAreaProvider } from "react-native-safe-area-context"
 
 export default function Audiobook() {
   const [SnackVisible, setSnackVisible] = useState(false)
+  const [requesting, setRequesting] = useState(false)
   const [msg, setMsg] = useState("")
   const audiobook = useRef(null)
 
@@ -15,30 +17,44 @@ export default function Audiobook() {
   const onDismissSnackBar = () => setSnackVisible(false)
 
   async function fetchAudiobooks() {
+    setRequesting(true)
     try {
       const response = await axios.get(`${global.API}/audiobooks`)
-      audiobook.current = response.data
-      setMsg("Audiobooks fetched Successfully.")
-      onToggleSnackBar()
+      console.log(response)
+
+      if (response.data.length === 0) {
+        setMsg("No Audiobooks Found")
+      } else {
+        audiobook.current = response.data
+        setMsg("Audiobooks fetched Successfully.")
+      }
     } catch (error) {
-      setMsg(error)
+      setMsg(error.message)
+    } finally {
+      setRequesting(false)
       onToggleSnackBar()
     }
   }
 
   useEffect(() => {
     ;(async () => {
-      await fetchAudiobooks()
+      fetchAudiobooks()
     })()
   }, [])
 
   return (
-    <View>
-      <ScrollView>
+    <SafeAreaProvider>
+      <ScrollView
+        contentContainerStyle={{
+          minHeight: "100%",
+          alignItems: "center",
+          backgroundColor: "#fff",
+        }}
+      >
+        <MonoText>Audiobook Views</MonoText>
+        <Text>Get all your generated audiobooks</Text>
+        <Divider style={Styles.divider} />
         <View style={Styles.container}>
-          <MonoText>Audiobook Views</MonoText>
-          <Text>Get all your generated audiobooks</Text>
-          <Divider style={Styles.divider} />
           {audiobook.current ? (
             audiobook.current?.map((book) => <AudioCard book={book} />)
           ) : (
@@ -46,28 +62,38 @@ export default function Audiobook() {
           )}
         </View>
       </ScrollView>
-      <FAB style={Styles.fab} icon="refresh" onPress={fetchAudiobooks} />
-      <Snackbar
-        visible={SnackVisible}
-        onDismiss={onDismissSnackBar}
-        action={{
-          label: "Close",
-          onPress: () => {
-            onDismissSnackBar()
-          },
+      <FAB
+        style={Styles.fab}
+        icon="refresh"
+        loading={requesting}
+        onPress={async () => {
+          await fetchAudiobooks()
         }}
-      >
-        {msg}
-      </Snackbar>
-    </View>
+      />
+      {msg.length > 0 && (
+        <Snackbar
+          visible={SnackVisible}
+          onDismiss={onDismissSnackBar}
+          action={{
+            label: "Dismiss",
+            icon: "close",
+            onPress: () => {
+              onDismissSnackBar()
+            },
+          }}
+        >
+          {msg}
+        </Snackbar>
+      )}
+    </SafeAreaProvider>
   )
 }
 
 const Styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: "#fff",
     alignItems: "center",
+    justifyContent: "center",
   },
   fab: {
     position: "absolute",

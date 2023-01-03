@@ -8,7 +8,7 @@ import { Text, View } from "../components/Themed"
 import { WebView } from "react-native-webview"
 
 export default function About() {
-  const website = "https://expo.dev" //"https://shrutiapp.com"
+  const website = "https://github.com/rahulshah63" //"https://shrutiapp.com"
   const [visitSite, setVisitSite] = useState(false)
 
   return (

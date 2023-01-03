@@ -38,9 +38,7 @@ export default function EditScreenInfo() {
 }
 
 function handleHelpPress() {
-  WebBrowser.openBrowserAsync(
-    "https://docs.expo.io/get-started/create-a-new-app/#opening-the-app-on-your-phonetablet"
-  )
+  WebBrowser.openBrowserAsync("https://github.com/NVIDIA/tacotron2")
 }
 
 const styles = StyleSheet.create({

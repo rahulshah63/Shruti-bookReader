@@ -33,7 +33,8 @@ export default function App() {
         onToggleSnackBar()
       }
     } catch (error) {
-      console.log(error)
+      setMsg(error.message)
+      onToggleSnackBar()
     }
   }
 
@@ -50,19 +51,21 @@ export default function App() {
       <SafeAreaProvider>
         <Navigation colorScheme={colorScheme} />
         <StatusBar />
-        <Snackbar
-          visible={SnackVisible}
-          onDismiss={onDismissSnackBar}
-          action={{
-            label: "Dismiss",
-            icon: "close",
-            onPress: () => {
-              onDismissSnackBar()
-            },
-          }}
-        >
-          {msg}
-        </Snackbar>
+        {msg.length > 0 && (
+          <Snackbar
+            visible={SnackVisible}
+            onDismiss={onDismissSnackBar}
+            action={{
+              label: "Dismiss",
+              icon: "close",
+              onPress: () => {
+                onDismissSnackBar()
+              },
+            }}
+          >
+            {msg}
+          </Snackbar>
+        )}
       </SafeAreaProvider>
     )
   }

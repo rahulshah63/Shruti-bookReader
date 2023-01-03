@@ -43,12 +43,17 @@ export default function PdfReader({ route }) {
           "Content-Type": "multipart/form-data",
         },
       })
-      console.log(res)
-      if (res.status === 200) playAudio()
+      if (res.status === 200) {
+        setMsg("AudioBook generated successfully")
+        playAudio()
+      } else {
+        setMsg("Something went wrong")
+      }
     } catch (error) {
-      setMsg("Error: " + error.message)
-      onToggleSnackBar()
+      setMsg(error.message)
+    } finally {
       setIsRequesting(false)
+      onToggleSnackBar()
     }
   }
 
@@ -80,10 +85,11 @@ export default function PdfReader({ route }) {
           }
         )
         await sound.playAsync()
+        setMsg("Playing AudioBook")
         setAudioIcon("pause")
-        setIsRequesting(false)
       } catch (error) {
-        setMsg("Error: " + error.message)
+        setMsg(error.message)
+      } finally {
         setIsRequesting(false)
         onToggleSnackBar()
       }
@@ -97,7 +103,7 @@ export default function PdfReader({ route }) {
           audio.current = null
         }
       : undefined
-  }, [audio.current])
+  }, [audio])
 
   //set timeout function to hide the FAB
   useEffect(() => {
@@ -168,18 +174,20 @@ export default function PdfReader({ route }) {
           style={[fabStyle, Styles.fab]}
         />
       )}
-      <Snackbar
-        visible={SnackVisible}
-        onDismiss={onDismissSnackBar}
-        action={{
-          label: "Close",
-          onPress: () => {
-            onDismissSnackBar()
-          },
-        }}
-      >
-        {msg}
-      </Snackbar>
+      {msg.length > 0 && (
+        <Snackbar
+          visible={SnackVisible}
+          onDismiss={onDismissSnackBar}
+          action={{
+            label: "Close",
+            onPress: () => {
+              onDismissSnackBar()
+            },
+          }}
+        >
+          {msg}
+        </Snackbar>
+      )}
     </SafeAreaView>
   )
 }
