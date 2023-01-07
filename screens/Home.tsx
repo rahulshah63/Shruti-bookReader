@@ -11,7 +11,6 @@ import { MonoText } from "../components/StyledText"
 import React, { useState } from "react"
 import { Card, Title, Paragraph, Snackbar } from "react-native-paper"
 import * as DocumentPicker from "expo-document-picker"
-import { SafeAreaProvider } from "react-native-safe-area-context"
 
 const Home = ({ navigation }) => {
   const [_pdfs, setPdfs] = useState([])

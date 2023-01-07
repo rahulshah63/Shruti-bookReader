@@ -9,16 +9,14 @@ import React, { useState, useRef, useEffect } from "react"
 import { MaterialCommunityIcons } from "@expo/vector-icons"
 import { Card, Title, Paragraph, ActivityIndicator } from "react-native-paper"
 
-export default function AudioCard({ book }) {
+export default function AudioCard({ book, setMsg, onToggleSnackBar }) {
   const [duraMillis, setDuraMillis] = useState(0)
   const [seekTime, setSeekTime] = useState(0)
   const [isRequesting, setIsRequesting] = useState(false)
   const audio = useRef(null)
   const [audioIcon, setAudioIcon] = useState("play")
 
-  async function playAudio(
-    audiouri = `${global.API}/sendfile/?filename=${book.title}`
-  ) {
+  async function playAudio() {
     if (audio.current !== null) {
       if (audioIcon === "pause") {
         setAudioIcon("play")
@@ -31,7 +29,7 @@ export default function AudioCard({ book }) {
       try {
         setIsRequesting(true)
         const { sound } = await Audio.Sound.createAsync({
-          uri: audiouri,
+          uri: `${global.API}/sendfile/?filename=${book.name}`,
         })
         audio.current = sound
         audio.current.setOnPlaybackStatusUpdate(
@@ -48,10 +46,14 @@ export default function AudioCard({ book }) {
           }
         )
         await sound.playAsync()
+        setMsg("Playing AudioBook")
         setAudioIcon("pause")
         setIsRequesting(false)
       } catch (error) {
-        console.log(error)
+        setMsg(error.message)
+      } finally {
+        setIsRequesting(false)
+        onToggleSnackBar()
       }
     }
   }
@@ -67,16 +69,13 @@ export default function AudioCard({ book }) {
   return (
     <Card style={Styles.cardContatiner}>
       <Card.Content>
-        <Title>{book.title}</Title>
+        <Title>{book.name}</Title>
         <MonoText>{book.tag}</MonoText>
         <Paragraph>{book.description}</Paragraph>
       </Card.Content>
 
       <View style={Styles.card}>
-        <Card.Cover
-          style={Styles.image}
-          source={{ uri: `${global.API}/sendCoverImg/?img=${book.title}` }}
-        />
+        <Card.Cover style={Styles.image} source={{ uri: `${book.cover}` }} />
         <View style={Styles.audioContainer}>
           <MonoText
             style={{
@@ -130,9 +129,8 @@ export default function AudioCard({ book }) {
 const Styles = StyleSheet.create({
   cardContatiner: {
     width: window.window.width - 20,
-    height: 150,
     borderRadius: 10,
-    margin: 15,
+    margin: 5,
   },
   card: {
     flex: 1,
@@ -140,7 +138,6 @@ const Styles = StyleSheet.create({
     alignSelf: "center",
     justifyContent: "space-between",
     width: "95%",
-    backgroundColor: "white",
     borderRadius: 10,
     margin: 5,
   },
@@ -153,8 +150,8 @@ const Styles = StyleSheet.create({
     alignItems: "center",
   },
   image: {
-    width: 50,
-    height: 50,
+    width: 60,
+    height: 60,
     borderRadius: 10,
   },
   audioContainer: {

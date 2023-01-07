@@ -1,13 +1,13 @@
-import { StyleSheet, SafeAreaView } from "react-native"
-import PDFReader from "rn-pdf-reader-js"
-import { ActivityIndicator, AnimatedFAB, Button, FAB } from "react-native-paper"
+import { StyleSheet, SafeAreaView, Image } from "react-native"
+import PDFReader from "rn-pdf-reader-js-improved"
+import { AnimatedFAB, Divider, FAB, Text } from "react-native-paper"
 import window from "../constants/Layout"
 import axios from "axios"
 import { Snackbar } from "react-native-paper"
 import { useEffect, useRef, useState } from "react"
 import { Audio } from "expo-av"
 import Slider from "@react-native-community/slider"
-import Colors from "../constants/Colors"
+import TextReader from "../components/TextReader"
 
 export default function PdfReader({ route }) {
   const [SnackVisible, setSnackVisible] = useState(false)
@@ -21,6 +21,8 @@ export default function PdfReader({ route }) {
     audio.current ? "play" : "book-music-outline"
   )
   const pdf = route.params.pdf
+  console.log(pdf)
+
   const animateFrom = "right"
   const visible = true
   const fabStyle = { [animateFrom]: 30 }
@@ -57,6 +59,36 @@ export default function PdfReader({ route }) {
     }
   }
 
+  async function loadAudio() {
+    try {
+      setIsRequesting(true)
+      const filename =
+        pdf.mimeType === "application/pdf" ? pdf.name.split(".")[0] : pdf.name
+
+      const { sound } = await Audio.Sound.createAsync({
+        // uri: `${global.API}/sendfile/?filename=${filename}`,
+        uri: `https://labs.phaser.io/assets/audio/DOG.mp3`,
+      })
+      audio.current = sound
+      audio.current.setOnPlaybackStatusUpdate(
+        (status: {
+          didJustFinish: boolean
+          positionMillis: number
+          durationMillis: number
+        }) => {
+          if (status.didJustFinish) {
+            setAudioIcon("play")
+          }
+          setSeekTime(status.positionMillis / status.durationMillis)
+        }
+      )
+      setIsRequesting(false)
+      setAudioIcon("play")
+    } catch (error) {
+      setMsg("Error loading audio file. Please try again later")
+    }
+  }
+
   async function playAudio() {
     if (audio.current !== null) {
       if (audioIcon === "pause") {
@@ -68,23 +100,8 @@ export default function PdfReader({ route }) {
       }
     } else {
       try {
-        const { sound } = await Audio.Sound.createAsync({
-          uri: `${global.API}/sendfile/?filename=${pdf.name.split(".")[0]}`,
-        })
-        audio.current = sound
-        audio.current.setOnPlaybackStatusUpdate(
-          (status: {
-            didJustFinish: boolean
-            positionMillis: number
-            durationMillis: number
-          }) => {
-            if (status.didJustFinish) {
-              setAudioIcon("play")
-            }
-            setSeekTime(status.positionMillis / status.durationMillis)
-          }
-        )
-        await sound.playAsync()
+        await loadAudio()
+        await audio.current.playAsync()
         setMsg("Playing AudioBook")
         setAudioIcon("pause")
       } catch (error) {
@@ -110,26 +127,38 @@ export default function PdfReader({ route }) {
     setTimeout(() => {
       setIsExtended(false)
     }, 3000)
+
+    //Load the audio file only for textReader
+    if (pdf.mimeType !== "application/pdf") {
+      ;(async () => {
+        await loadAudio()
+      })()
+    }
   }, [])
 
   return (
     <SafeAreaView style={Styles.container}>
-      <PDFReader
-        style={Styles.pdfReader}
-        source={{
-          uri: `${pdf.uri}`,
-        }}
-        withPinchZoom={true}
-        withScroll={true}
-        customStyle={{
-          readerContainer: {
-            backgroundColor: "#e5e5e5",
-          },
-          readerContainerZoomContainerButton: {
-            display: "none",
-          },
-        }}
-      />
+      {pdf.mimeType === "application/pdf" ? (
+        <PDFReader
+          style={Styles.pdfReader}
+          source={{
+            uri: `${pdf.uri}`,
+          }}
+          withPinchZoom={true}
+          withScroll={true}
+          customStyle={{
+            readerContainer: {
+              backgroundColor: "#e5e5e5",
+            },
+            readerContainerZoomContainerButton: {
+              display: "none",
+            },
+          }}
+        />
+      ) : (
+        <TextReader pdf={pdf} />
+      )}
+
       {sliderVisible && (
         <Slider
           style={Styles.slider}
@@ -205,12 +234,7 @@ const Styles = StyleSheet.create({
     bottom: 30,
     right: 30,
   },
-  text: {
-    textAlign: "center",
-    marginVertical: 20,
-    fontSize: 20,
-    color: "pink",
-  },
+
   slider: {
     position: "absolute",
     bottom: 5,

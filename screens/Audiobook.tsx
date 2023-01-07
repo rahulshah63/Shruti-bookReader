@@ -1,17 +1,19 @@
 import React, { useEffect, useRef, useState } from "react"
-import { StyleSheet, ScrollView } from "react-native"
+import { StyleSheet, ScrollView, TouchableOpacity } from "react-native"
 import { MonoText } from "../components/StyledText"
 import { Text, View } from "../components/Themed"
-import { FAB, Divider, Snackbar } from "react-native-paper"
+import { FAB, Divider, Snackbar, TouchableRipple } from "react-native-paper"
 import AudioCard from "../components/Audio"
 import axios from "axios"
 import { SafeAreaProvider } from "react-native-safe-area-context"
+import { BOOKS } from "../constants/book"
 
-export default function Audiobook() {
+export default function Audiobook({ navigation }) {
   const [SnackVisible, setSnackVisible] = useState(false)
   const [requesting, setRequesting] = useState(false)
   const [msg, setMsg] = useState("")
-  const audiobook = useRef(null)
+  // const audiobook = useRef(null)
+  const audiobook = useRef(BOOKS)
 
   const onToggleSnackBar = () => setSnackVisible(!SnackVisible)
   const onDismissSnackBar = () => setSnackVisible(false)
@@ -54,13 +56,27 @@ export default function Audiobook() {
         <MonoText>Audiobook Views</MonoText>
         <Text>Get all your generated audiobooks</Text>
         <Divider style={Styles.divider} />
-        <View style={Styles.container}>
-          {audiobook.current ? (
-            audiobook.current?.map((book) => <AudioCard book={book} />)
-          ) : (
+        {audiobook.current ? (
+          audiobook.current?.map((book, index) => (
+            <TouchableRipple
+              key={index}
+              borderless={true}
+              onPress={() => {
+                navigation.navigate("Pdf", { pdf: book })
+              }}
+            >
+              <AudioCard
+                book={book}
+                setMsg={setMsg}
+                onToggleSnackBar={onToggleSnackBar}
+              />
+            </TouchableRipple>
+          ))
+        ) : (
+          <View style={Styles.container}>
             <MonoText>No Audiobooks Found</MonoText>
-          )}
-        </View>
+          </View>
+        )}
       </ScrollView>
       <FAB
         style={Styles.fab}
@@ -91,8 +107,7 @@ export default function Audiobook() {
 
 const Styles = StyleSheet.create({
   container: {
-    flex: 1,
-    alignItems: "center",
+    height: "100%",
     justifyContent: "center",
   },
   fab: {
