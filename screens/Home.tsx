@@ -77,7 +77,7 @@ const Home = ({ navigation }) => {
                 onPress={() => {
                   // setPdfSource(pdf);
                   // setOpenPdf(true);
-                  navigation.navigate("Pdf", { pdf: pdf })
+                  navigation.navigate("Content", { content: pdf })
                 }}
                 mode="outlined"
                 // onLongPress={}  //TODO: Delete Pdf

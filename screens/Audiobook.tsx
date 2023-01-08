@@ -3,15 +3,15 @@ import { StyleSheet, ScrollView, TouchableOpacity } from "react-native"
 import { MonoText } from "../components/StyledText"
 import { Text, View } from "../components/Themed"
 import { FAB, Divider, Snackbar, TouchableRipple } from "react-native-paper"
-import AudioCard from "../components/Audio"
+import AudioCard from "../components/AudioCard"
 import axios from "axios"
 import { SafeAreaProvider } from "react-native-safe-area-context"
 import { BOOKS } from "../constants/book"
 
 export default function Audiobook({ navigation }) {
   const [SnackVisible, setSnackVisible] = useState(false)
-  const [requesting, setRequesting] = useState(false)
   const [msg, setMsg] = useState("")
+  const [requesting, setRequesting] = useState(false)
   // const audiobook = useRef(null)
   const audiobook = useRef(BOOKS)
 
@@ -62,7 +62,7 @@ export default function Audiobook({ navigation }) {
               key={index}
               borderless={true}
               onPress={() => {
-                navigation.navigate("Pdf", { pdf: book })
+                navigation.navigate("Content", { content: book })
               }}
             >
               <AudioCard

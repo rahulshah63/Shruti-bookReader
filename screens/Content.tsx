@@ -1,5 +1,4 @@
 import { StyleSheet, SafeAreaView, Image } from "react-native"
-import PDFReader from "rn-pdf-reader-js-improved"
 import { AnimatedFAB, Divider, FAB, Text } from "react-native-paper"
 import window from "../constants/Layout"
 import axios from "axios"
@@ -7,21 +6,21 @@ import { Snackbar } from "react-native-paper"
 import { useEffect, useRef, useState } from "react"
 import { Audio } from "expo-av"
 import Slider from "@react-native-community/slider"
-import TextReader from "../components/TextReader"
+import TextViewer from "../components/TextViewer"
+import PdfViewer from "../components/PdfViewer"
 
-export default function PdfReader({ route }) {
+export default function Content({ route }) {
   const [SnackVisible, setSnackVisible] = useState(false)
   const [msg, setMsg] = useState("")
-  const [isExtended, setIsExtended] = useState(true)
-  const [seekTime, setSeekTime] = useState(0)
   const [isRequesting, setIsRequesting] = useState(false)
+  const [isExtended, setIsExtended] = useState(true)
+  const [posMillis, setPositionMillis] = useState(0)
+  const [duraMillis, setDuraMillis] = useState(0)
   const [sliderVisible, setSliderVisible] = useState(false)
   const audio = useRef(null)
-  const [audioIcon, setAudioIcon] = useState(
-    audio.current ? "play" : "book-music-outline"
-  )
-  const pdf = route.params.pdf
-  console.log(pdf)
+  const [audioIcon, setAudioIcon] = useState("book-music-outline")
+
+  const pdf = route.params.content
 
   const animateFrom = "right"
   const visible = true
@@ -67,19 +66,22 @@ export default function PdfReader({ route }) {
 
       const { sound } = await Audio.Sound.createAsync({
         // uri: `${global.API}/sendfile/?filename=${filename}`,
-        uri: `https://labs.phaser.io/assets/audio/DOG.mp3`,
+        uri: `https://labs.phaser.io/assets/audio/jungle.mp3`,
       })
       audio.current = sound
       audio.current.setOnPlaybackStatusUpdate(
-        (status: {
+        async (status: {
           didJustFinish: boolean
           positionMillis: number
           durationMillis: number
         }) => {
           if (status.didJustFinish) {
             setAudioIcon("play")
+            await audio.current.pauseAsync()
+            await audio.current.setPositionAsync(0)
           }
-          setSeekTime(status.positionMillis / status.durationMillis)
+          setDuraMillis(status.durationMillis)
+          setPositionMillis(status.positionMillis)
         }
       )
       setIsRequesting(false)
@@ -139,36 +141,20 @@ export default function PdfReader({ route }) {
   return (
     <SafeAreaView style={Styles.container}>
       {pdf.mimeType === "application/pdf" ? (
-        <PDFReader
-          style={Styles.pdfReader}
-          source={{
-            uri: `${pdf.uri}`,
-          }}
-          withPinchZoom={true}
-          withScroll={true}
-          customStyle={{
-            readerContainer: {
-              backgroundColor: "#e5e5e5",
-            },
-            readerContainerZoomContainerButton: {
-              display: "none",
-            },
-          }}
-        />
+        <PdfViewer pdf={pdf} />
       ) : (
-        <TextReader pdf={pdf} />
+        <TextViewer pdf={pdf} posMillis={posMillis} durationTime={duraMillis} />
       )}
 
       {sliderVisible && (
         <Slider
           style={Styles.slider}
           minimumValue={audio.current ? 0 : 0}
-          maximumValue={audio.current ? 1 : 0}
-          value={seekTime}
+          maximumValue={audio.current ? duraMillis : 0}
+          value={posMillis}
           onValueChange={async (value) => {
             if (!audio.current) return
-            const status = await audio.current?.getStatusAsync()
-            await audio.current?.setPositionAsync(value * status.durationMillis)
+            await audio.current?.setPositionAsync(value)
           }}
           onSlidingStart={async () => {
             if (!audio.current) return
@@ -224,10 +210,6 @@ export default function PdfReader({ route }) {
 const Styles = StyleSheet.create({
   container: {
     flexGrow: 1,
-  },
-  pdfReader: {
-    width: window["width"],
-    height: window["height"],
   },
   fab: {
     position: "absolute",

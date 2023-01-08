@@ -12,7 +12,7 @@ import { ColorSchemeName, Pressable } from "react-native"
 import Colors from "../constants/Colors"
 import useColorScheme from "../hooks/useColorScheme"
 import About from "../screens/About"
-import PdfReader from "../screens/PdfReader"
+import Content from "../screens/Content"
 import NotFoundScreen from "../screens/NotFoundScreen"
 import Home from "../screens/Home"
 import Audiobook from "../screens/Audiobook"
@@ -56,10 +56,10 @@ function RootNavigator() {
       <Stack.Group screenOptions={{ presentation: "modal" }}>
         <Stack.Screen name="About" component={About} />
         <Stack.Screen
-          name="Pdf"
-          component={PdfReader}
+          name="Content"
+          component={Content}
           options={({ route }) => ({
-            title: route.params.pdf.name ?? "PDF Reader",
+            title: route.params.content.name ?? "PDF Reader",
           })}
         />
       </Stack.Group>
