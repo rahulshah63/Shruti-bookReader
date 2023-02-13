@@ -65,8 +65,8 @@ export default function Content({ route }) {
         pdf.mimeType === "application/pdf" ? pdf.name.split(".")[0] : pdf.name
 
       const { sound } = await Audio.Sound.createAsync({
-        // uri: `${global.API}/sendfile/?filename=${filename}`,
-        uri: `https://labs.phaser.io/assets/audio/jungle.mp3`,
+        uri: `${global.API}/sendfile/?filename=${filename}`,
+        // uri: `https://labs.phaser.io/assets/audio/jungle.mp3`,
       })
       audio.current = sound
       audio.current.setOnPlaybackStatusUpdate(

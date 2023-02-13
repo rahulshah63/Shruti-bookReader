@@ -20,7 +20,7 @@ export default function App() {
       const res = await axios.get("https://api.ngrok.com/endpoints", {
         headers: {
           authorization:
-            "Bearer 2JlZCcNQIvf5R5SubwEELcNMQP1_2QLUuwWRRBvVYd21zcRfK",
+            "Bearer 2LbKm8ytzFIqUiaxMIp47dOpuiz_74LUxzEnqgTj1WZqVq3Cj",
           "ngrok-version": "2",
         },
       })

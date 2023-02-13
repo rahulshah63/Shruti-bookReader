@@ -9,19 +9,12 @@ import { TouchableOpacity, StyleSheet } from "react-native"
 import { ActivityIndicator } from "react-native-paper"
 import window from "../constants/Layout"
 
-export default function AudioSlider({
-  isPDF,
-  filename,
-  setMsg,
-  onToggleSnackBar,
-}) {
+export default function AudioSlider({ filename, setMsg, onToggleSnackBar }) {
   const [duraMillis, setDuraMillis] = useState(0)
   const [seekTime, setSeekTime] = useState(0)
   const [isRequesting, setIsRequesting] = useState(false)
   const audio = useRef(null)
-  const [audioIcon, setAudioIcon] = useState(
-    isPDF ? "book-music-outline" : "play"
-  )
+  const [audioIcon, setAudioIcon] = useState("play")
 
   async function playAudio() {
     if (audio.current !== null) {
@@ -36,9 +29,7 @@ export default function AudioSlider({
       try {
         setIsRequesting(true)
         const { sound } = await Audio.Sound.createAsync({
-          //   uri: `${global.API}/sendfile/?filename=${filename}}`,
-          uri: `https://labs.phaser.io/assets/audio/DOG.mp3'+}
-          `,
+          uri: `${global.API}/sendfile/?filename=${filename}`,
         })
         audio.current = sound
         audio.current.setOnPlaybackStatusUpdate(
@@ -77,20 +68,18 @@ export default function AudioSlider({
 
   return (
     <View style={Styles.audioContainer}>
-      {!isPDF && (
-        <MonoText
-          style={{
-            marginLeft: 10,
-          }}
-        >
-          {Math.floor((seekTime * duraMillis) / 1000 / 3600)}:
-          {Math.floor((seekTime * duraMillis) / 1000 / 60)}:
-          {Math.floor((seekTime * duraMillis) / 1000) % 60}/
-          {Math.floor(duraMillis / 1000 / 3600)}:
-          {Math.floor(duraMillis / 1000 / 60)}:
-          {Math.floor(duraMillis / 1000) % 60}
-        </MonoText>
-      )}
+      <MonoText
+        style={{
+          marginLeft: 10,
+        }}
+      >
+        {Math.floor((seekTime * duraMillis) / 1000 / 3600)}:
+        {Math.floor((seekTime * duraMillis) / 1000 / 60)}:
+        {Math.floor((seekTime * duraMillis) / 1000) % 60}/
+        {Math.floor(duraMillis / 1000 / 3600)}:
+        {Math.floor(duraMillis / 1000 / 60)}:
+        {Math.floor(duraMillis / 1000) % 60}
+      </MonoText>
       <View style={Styles.AudioSlider}>
         <Slider
           style={Styles.slider}

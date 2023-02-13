@@ -85,7 +85,12 @@ export default function TextViewer({
               <MonoText style={Styles.description}>{pdf.description}</MonoText>
             </View>
             <View>
-              <Image source={{ uri: pdf.cover }} style={Styles.image} />
+              <Image
+                source={{
+                  uri: `${global.API}/sendcover/?filename=${pdf.name}`,
+                }}
+                style={Styles.image}
+              />
             </View>
           </View>
           <Divider style={Styles.divider} />

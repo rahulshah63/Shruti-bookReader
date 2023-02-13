@@ -9,7 +9,12 @@ export default function AudioCard({ book, setMsg, onToggleSnackBar }) {
   return (
     <Card style={Styles.cardContatiner}>
       <View style={Styles.card}>
-        <Card.Cover style={Styles.image} source={{ uri: `${book.cover}` }} />
+        <Card.Cover
+          style={Styles.image}
+          source={{
+            uri: `${global.API}/sendcover/?filename=${book.name}`,
+          }}
+        />
         <Card.Content>
           <Title>{book.name}</Title>
           <MonoText>{book.tag}</MonoText>
@@ -17,7 +22,6 @@ export default function AudioCard({ book, setMsg, onToggleSnackBar }) {
         </Card.Content>
       </View>
       <AudioSlider
-        isPDF={false}
         filename={book.name}
         setMsg={setMsg}
         onToggleSnackBar={onToggleSnackBar}

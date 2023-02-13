@@ -6,14 +6,14 @@ import { FAB, Divider, Snackbar, TouchableRipple } from "react-native-paper"
 import AudioCard from "../components/AudioCard"
 import axios from "axios"
 import { SafeAreaProvider } from "react-native-safe-area-context"
-import { BOOKS } from "../constants/book"
+// import { BOOKS } from "../constants/book"
 
 export default function Audiobook({ navigation }) {
   const [SnackVisible, setSnackVisible] = useState(false)
   const [msg, setMsg] = useState("")
   const [requesting, setRequesting] = useState(false)
-  // const audiobook = useRef(null)
-  const audiobook = useRef(BOOKS)
+  const audiobook = useRef(null)
+  // const audiobook = useRef(BOOKS)
 
   const onToggleSnackBar = () => setSnackVisible(!SnackVisible)
   const onDismissSnackBar = () => setSnackVisible(false)
@@ -22,8 +22,6 @@ export default function Audiobook({ navigation }) {
     setRequesting(true)
     try {
       const response = await axios.get(`${global.API}/audiobooks`)
-      console.log(response)
-
       if (response.data.length === 0) {
         setMsg("No Audiobooks Found")
       } else {
