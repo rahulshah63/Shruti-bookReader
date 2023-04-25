@@ -9,7 +9,7 @@ import { TouchableOpacity, StyleSheet } from "react-native"
 import { ActivityIndicator } from "react-native-paper"
 import window from "../constants/Layout"
 
-export default function AudioSlider({ filename, setMsg, onToggleSnackBar }) {
+export default function AudioSlider({ url, setMsg, onToggleSnackBar }) {
   const [duraMillis, setDuraMillis] = useState(0)
   const [seekTime, setSeekTime] = useState(0)
   const [isRequesting, setIsRequesting] = useState(false)
@@ -29,7 +29,7 @@ export default function AudioSlider({ filename, setMsg, onToggleSnackBar }) {
       try {
         setIsRequesting(true)
         const { sound } = await Audio.Sound.createAsync({
-          uri: `${global.API}/sendfile/?filename=${filename}`,
+          uri: url,
         })
         audio.current = sound
         audio.current.setOnPlaybackStatusUpdate(

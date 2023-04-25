@@ -11,6 +11,7 @@ import { MonoText } from "../components/StyledText"
 import React, { useState } from "react"
 import { Card, Title, Paragraph, Snackbar } from "react-native-paper"
 import * as DocumentPicker from "expo-document-picker"
+import AudioRecording from "../components/AudioRecorder"
 
 const Home = ({ navigation }) => {
   const [_pdfs, setPdfs] = useState([])
@@ -48,6 +49,7 @@ const Home = ({ navigation }) => {
 
   return (
     <ScrollView contentContainerStyle={{ minHeight: "100%" }}>
+      <AudioRecording />
       <View style={Styles.container}>
         <TouchableOpacity>
           <Card
@@ -123,7 +125,6 @@ const Styles = StyleSheet.create({
     flexDirection: "row",
     flex: 1,
     flexWrap: "wrap",
-    marginLeft: 10,
     alignItems: "center",
     justifyContent: "center",
   },

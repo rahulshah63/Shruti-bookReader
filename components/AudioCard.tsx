@@ -22,7 +22,7 @@ export default function AudioCard({ book, setMsg, onToggleSnackBar }) {
         </Card.Content>
       </View>
       <AudioSlider
-        filename={book.name}
+        url={`${global.API}/sendfile/?filename=${book.name}`}
         setMsg={setMsg}
         onToggleSnackBar={onToggleSnackBar}
       />
