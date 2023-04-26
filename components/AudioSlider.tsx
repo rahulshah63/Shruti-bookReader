@@ -58,12 +58,15 @@ export default function AudioSlider({ url, setMsg, onToggleSnackBar }) {
     }
   }
   useEffect(() => {
-    return audio.current
-      ? () => {
-          audio.current.unloadAsync()
-          audio.current = null
-        }
-      : undefined
+    return () => {
+      if (audio.current) {
+        audio.current.pauseAsync()
+        audio.current.stopAsync()
+        audio.current.setOnPlaybackStatusUpdate(null)
+        audio.current.unloadAsync()
+        audio.current = null
+      }
+    }
   }, [audio.current])
 
   return (

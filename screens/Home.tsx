@@ -9,9 +9,8 @@ import { View } from "../components/Themed"
 import window from "../constants/Layout"
 import { MonoText } from "../components/StyledText"
 import React, { useState } from "react"
-import { Card, Title, Paragraph, Snackbar } from "react-native-paper"
+import { Card, Title, Paragraph, Snackbar, Divider } from "react-native-paper"
 import * as DocumentPicker from "expo-document-picker"
-import AudioRecording from "../components/AudioRecorder"
 
 const Home = ({ navigation }) => {
   const [_pdfs, setPdfs] = useState([])
@@ -49,7 +48,6 @@ const Home = ({ navigation }) => {
 
   return (
     <ScrollView contentContainerStyle={{ minHeight: "100%" }}>
-      <AudioRecording />
       <View style={Styles.container}>
         <TouchableOpacity>
           <Card

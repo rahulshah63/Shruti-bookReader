@@ -115,14 +115,16 @@ export default function Content({ route }) {
     }
   }
   useEffect(() => {
-    return audio.current
-      ? () => {
-          audio.current.pauseAsync()
-          audio.current.unloadAsync()
-          audio.current = null
-        }
-      : undefined
-  }, [audio])
+    return () => {
+      if (audio.current) {
+        audio.current.pauseAsync()
+        audio.current.stopAsync()
+        audio.current.setOnPlaybackStatusUpdate(null)
+        audio.current.unloadAsync()
+        audio.current = null
+      }
+    }
+  }, [audio.current])
 
   //set timeout function to hide the FAB
   useEffect(() => {

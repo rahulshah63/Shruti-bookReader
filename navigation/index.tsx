@@ -22,6 +22,7 @@ import {
   RootTabScreenProps,
 } from "../types"
 import LinkingConfiguration from "./LinkingConfiguration"
+import AudioRecording from "../screens/AudioRecorder"
 
 export default function Navigation({
   colorScheme,
@@ -115,6 +116,31 @@ function BottomTabNavigator() {
           title: "Audiobooks",
           tabBarIcon: ({ color }) => (
             <TabBarIcon name="file-audio-o" color={color} />
+          ),
+          headerRight: () => (
+            <Pressable
+              onPress={() => navigation.navigate("About")}
+              style={({ pressed }) => ({
+                opacity: pressed ? 0.5 : 1,
+              })}
+            >
+              <FontAwesome
+                name="info-circle"
+                size={25}
+                color={Colors[colorScheme].text}
+                style={{ marginRight: 15 }}
+              />
+            </Pressable>
+          ),
+        })}
+      />
+      <BottomTab.Screen
+        name="Translation"
+        component={AudioRecording}
+        options={({ navigation }: RootTabScreenProps<"Home">) => ({
+          title: "Transcribe",
+          tabBarIcon: ({ color }) => (
+            <TabBarIcon name="microphone" color={color} />
           ),
           headerRight: () => (
             <Pressable
