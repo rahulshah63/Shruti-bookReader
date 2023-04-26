@@ -5,8 +5,7 @@ import AudioSlider from "../components/AudioSlider"
 import { MaterialCommunityIcons } from "@expo/vector-icons"
 import { MonoText } from "../components/StyledText"
 import axios from "axios"
-import { SafeAreaView } from "react-native-safe-area-context"
-import { Divider, Snackbar } from "react-native-paper"
+import { Divider, Snackbar, ActivityIndicator } from "react-native-paper"
 
 export default function AudioRecording() {
   const [recording, setRecording] = useState(null)
@@ -21,10 +20,10 @@ export default function AudioRecording() {
   const onDismissSnackBar = () => setSnackVisible(false)
 
   const toggleLang = () => {
-    if (Lang === "Nepali") {
-      setLang("English")
+    if (Lang === "np") {
+      setLang("en")
     } else {
-      setLang("Nepali")
+      setLang("np")
     }
   }
 
@@ -136,7 +135,11 @@ export default function AudioRecording() {
                 style={styles.button}
                 onPress={ontranslateApiCall}
               >
-                <Text style={styles.buttonText}>Translate</Text>
+                {isRequesting ? (
+                  <ActivityIndicator size="small" color="white" />
+                ) : (
+                  <Text style={styles.buttonText}>Translate</Text>
+                )}
               </TouchableOpacity>
             )}
           </View>
